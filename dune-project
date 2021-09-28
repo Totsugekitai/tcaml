@@ -13,5 +13,4 @@
  (synopsis "tiny ocaml compiler")
  (description "tiny ocaml compiler")
  (depends
-  (ounit2 :with-test)
-  (dune (> 2.5))))
+  (ounit2 :with-test)))

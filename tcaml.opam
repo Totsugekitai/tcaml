@@ -9,8 +9,8 @@ license: "MIT"
 homepage: "https://github.com/Totsugekitai/tcaml"
 bug-reports: "https://github.com/Totsugekitai/tcaml/issues"
 depends: [
+  "dune" {>= "2.9"}
   "ounit2" {with-test}
-  "dune" {>= "2.9" & > "2.5"}
   "odoc" {with-doc}
 ]
 build: [
