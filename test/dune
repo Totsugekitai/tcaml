@@ -1,0 +1,3 @@
+(test
+ (name tcaml_test)
+ (libraries ounit2 tcaml_lib))
