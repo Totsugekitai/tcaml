@@ -25,6 +25,8 @@ type token =
   | Comma
   | Arrow
   | Vertical
+  | Quote
+  | DoubleQuote
   (* キーワード *)
   | Let
   | Rec
@@ -36,11 +38,8 @@ type token =
   | If
   | Then
   | Else
-  | DoubleQuote
   (* それ以外 *)
   | Unknown
-
-let empty_token = []
 
 let skip_list = [ ' '; '\t'; '\n'; '\r' ]
 
@@ -75,15 +74,21 @@ let lexer src =
     let rec read_lower_ident acc i =
       let maybe_c = read_char i in
       match maybe_c with
-      | i, Some c when is_lower c -> read_lower_ident (acc ^ Char.escaped c) i
+      | i, Some c when is_lower c ->
+          (* クオートだけ特殊文字でエスケープして返されるのでこうなってる *)
+          if c != '\'' then read_lower_ident (acc ^ Char.escaped c) i
+          else read_lower_ident (acc ^ "'") i
       | i, Some _ -> (acc, i - 1)
       | _, None -> (acc, i)
     in
+    (* 連続したcapital caseの識別子文字列をCapitalIdentに変換 *)
     let rec read_capital_ident acc i =
       let maybe_c = read_char i in
       match maybe_c with
       | i, Some c when is_capital c ->
-          read_capital_ident (acc ^ Char.escaped c) i
+          (* クオートだけ特殊文字でエスケープして返されるのでこうなってる *)
+          if c != '\'' then read_capital_ident (acc ^ Char.escaped c) i
+          else read_capital_ident (acc ^ "'") i
       | i, Some _ -> (acc, i - 1)
       | _, None -> (acc, i)
     in
@@ -98,18 +103,39 @@ let lexer src =
         | c when is_digit c ->
             let num, i = read_int 0 (i - 1) in
             aux (acc @ [ IntLit num ]) i
-        (* 識別子 *)
-        | c when is_lower c ->
+        (* 識別子と予約語 *)
+        | c when is_lower c -> (
             let ident, i = read_lower_ident "" (i - 1) in
-            aux (acc @ [ LowerIdent ident ]) i
+            match ident with
+            | "let" -> aux (acc @ [ Let ]) i
+            | "rec" -> aux (acc @ [ Rec ]) i
+            | "type" -> aux (acc @ [ Type ]) i
+            | "of" -> aux (acc @ [ Of ]) i
+            | "match" -> aux (acc @ [ Match ]) i
+            | "with" -> aux (acc @ [ With ]) i
+            | "in" -> aux (acc @ [ In ]) i
+            | "if" -> aux (acc @ [ If ]) i
+            | "then" -> aux (acc @ [ Then ]) i
+            | "else" -> aux (acc @ [ Else ]) i
+            | _ -> aux (acc @ [ LowerIdent ident ]) i)
         | c when is_capital c ->
             let ident, i = read_capital_ident "" (i - 1) in
             aux (acc @ [ CapitalIdent ident ]) i
-        (* 演算子 *)
+        (* 記号 *)
         | '+' -> aux (acc @ [ Plus ]) i
         | '-' -> aux (acc @ [ Minus ]) i
         | '*' -> aux (acc @ [ Asterisk ]) i
         | '/' -> aux (acc @ [ Slash ]) i
+        | '=' -> aux (acc @ [ Equal ]) i
+        | '>' -> aux (acc @ [ Greater ]) i
+        | '<' -> aux (acc @ [ Less ]) i
+        | '(' -> aux (acc @ [ LParen ]) i
+        | ')' -> aux (acc @ [ RParen ]) i
+        | '.' -> aux (acc @ [ Dot ]) i
+        | ',' -> aux (acc @ [ Comma ]) i
+        | '|' -> aux (acc @ [ Vertical ]) i
+        | '\'' -> aux (acc @ [ Quote ]) i
+        | '"' -> aux (acc @ [ DoubleQuote ]) i
         (* その他 *)
         | _ -> failwith "unknown character")
   in

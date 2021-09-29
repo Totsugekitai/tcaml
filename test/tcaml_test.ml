@@ -10,6 +10,7 @@ let suite =
          "Eval_test.env" >:: Eval_test.env;
          "Lexer_test.arithmetic" >:: Lexer_test.arithmetic;
          "Lexer_test.identifier" >:: Lexer_test.identifier;
+         "Lexer_test.reserved_word" >:: Lexer_test.reserved_word;
        ]
 
 let () = run_test_tt_main suite

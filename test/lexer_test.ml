@@ -17,3 +17,13 @@ let identifier _ =
   assert_equal
     [ CapitalIdent "FooBar_"; CapitalIdent "Baz" ]
     (lexer "FooBar_ Baz")
+
+let reserved_word _ =
+  assert_equal [ Let ] (lexer "let");
+  assert_equal [ LowerIdent "let's"; LowerIdent "play" ] (lexer "let's play");
+  assert_equal
+    [ LowerIdent "let's"; LowerIdent "play"; Let ]
+    (lexer "let's play let");
+  assert_equal
+    [ In; Match; With; Of; If; Then; Else ]
+    (lexer "in match with of if then else")
