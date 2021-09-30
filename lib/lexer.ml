@@ -8,7 +8,7 @@ type token =
   | CapitalIdent of string
   | LowerIdent of string
   (* 中置演算子 *)
-  | Infix of string
+  (* | Infix of string *)
   (* 算術演算子 *)
   | Plus
   | Minus
@@ -27,6 +27,7 @@ type token =
   | Vertical
   | Quote
   | DoubleQuote
+  | At
   (* キーワード *)
   | Let
   | Rec
@@ -38,6 +39,9 @@ type token =
   | If
   | Then
   | Else
+  | When
+  | Fun
+  | Function
   (* それ以外 *)
   | Unknown
 
@@ -92,6 +96,27 @@ let lexer src =
       | i, Some _ -> (acc, i - 1)
       | _, None -> (acc, i)
     in
+    (* コメントを読み飛ばす処理 *)
+    let rec read_comment acc i nest_level =
+      let maybe_c = read_char i in
+      match maybe_c with
+      | i, Some c when c = '(' -> (
+          let maybe_c = read_char i in
+          match maybe_c with
+          | i, Some c when c = '*' -> read_comment acc i (nest_level + 1)
+          | i, Some _ -> (acc @ [ LParen ], i - 1)
+          | i, None -> (acc, i))
+      | i, Some c when c = '*' -> (
+          let maybe_c = read_char i in
+          match maybe_c with
+          | i, Some c when c = ')' ->
+              if nest_level = 0 then (acc, i)
+              else read_comment acc i (nest_level - 1)
+          | i, Some _ -> read_comment acc i nest_level
+          | _, None -> failwith "comment is not closed")
+      | i, Some _ -> read_comment acc i nest_level
+      | i, None -> (acc, i)
+    in
     (* 文字を振り分ける処理 *)
     match read_char i with
     | _, None -> acc
@@ -103,6 +128,30 @@ let lexer src =
         | c when is_digit c ->
             let num, i = read_int 0 (i - 1) in
             aux (acc @ [ IntLit num ]) i
+        (* 記号 *)
+        | '+' -> aux (acc @ [ Plus ]) i
+        | '-' -> aux (acc @ [ Minus ]) i
+        | '*' -> aux (acc @ [ Asterisk ]) i
+        | '/' -> aux (acc @ [ Slash ]) i
+        | '=' -> aux (acc @ [ Equal ]) i
+        | '>' -> aux (acc @ [ Greater ]) i
+        | '<' -> aux (acc @ [ Less ]) i
+        (* | '(' -> aux (acc @ [ LParen ]) i *)
+        | '(' -> (
+            let maybe_c = read_char i in
+            match maybe_c with
+            | i, Some c when c = '*' ->
+                let acc, i = read_comment acc i 0 in
+                aux acc i
+            | i, Some _ -> aux (acc @ [ LParen ]) (i - 1)
+            | _, None -> acc)
+        | ')' -> aux (acc @ [ RParen ]) i
+        | '.' -> aux (acc @ [ Dot ]) i
+        | ',' -> aux (acc @ [ Comma ]) i
+        | '|' -> aux (acc @ [ Vertical ]) i
+        | '\'' -> aux (acc @ [ Quote ]) i
+        | '"' -> aux (acc @ [ DoubleQuote ]) i
+        | '@' -> aux (acc @ [ At ]) i
         (* 識別子と予約語 *)
         | c when is_lower c -> (
             let ident, i = read_lower_ident "" (i - 1) in
@@ -117,25 +166,13 @@ let lexer src =
             | "if" -> aux (acc @ [ If ]) i
             | "then" -> aux (acc @ [ Then ]) i
             | "else" -> aux (acc @ [ Else ]) i
+            | "when" -> aux (acc @ [ When ]) i
+            | "fun" -> aux (acc @ [ Fun ]) i
+            | "function" -> aux (acc @ [ Function ]) i
             | _ -> aux (acc @ [ LowerIdent ident ]) i)
         | c when is_capital c ->
             let ident, i = read_capital_ident "" (i - 1) in
             aux (acc @ [ CapitalIdent ident ]) i
-        (* 記号 *)
-        | '+' -> aux (acc @ [ Plus ]) i
-        | '-' -> aux (acc @ [ Minus ]) i
-        | '*' -> aux (acc @ [ Asterisk ]) i
-        | '/' -> aux (acc @ [ Slash ]) i
-        | '=' -> aux (acc @ [ Equal ]) i
-        | '>' -> aux (acc @ [ Greater ]) i
-        | '<' -> aux (acc @ [ Less ]) i
-        | '(' -> aux (acc @ [ LParen ]) i
-        | ')' -> aux (acc @ [ RParen ]) i
-        | '.' -> aux (acc @ [ Dot ]) i
-        | ',' -> aux (acc @ [ Comma ]) i
-        | '|' -> aux (acc @ [ Vertical ]) i
-        | '\'' -> aux (acc @ [ Quote ]) i
-        | '"' -> aux (acc @ [ DoubleQuote ]) i
         (* その他 *)
         | _ -> failwith "unknown character")
   in

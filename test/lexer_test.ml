@@ -27,3 +27,11 @@ let reserved_word _ =
   assert_equal
     [ In; Match; With; Of; If; Then; Else ]
     (lexer "in match with of if then else")
+
+let symbol _ =
+  assert_equal [ At; Dot; Comma; Quote; DoubleQuote ] (lexer "@ . , ' \"")
+
+let comment _ =
+  assert_equal [] (lexer "(* aaa *)");
+  assert_equal [] (lexer "(* aaa (* bbb *) *)");
+  assert_equal [ LowerIdent "ddd" ] (lexer "(* aaa (* bbb(*ccc*) *) *) ddd")

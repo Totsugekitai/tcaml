@@ -11,6 +11,8 @@ let suite =
          "Lexer_test.arithmetic" >:: Lexer_test.arithmetic;
          "Lexer_test.identifier" >:: Lexer_test.identifier;
          "Lexer_test.reserved_word" >:: Lexer_test.reserved_word;
+         "Lexer_test.symbol" >:: Lexer_test.symbol;
+         "Lexer_test.comment" >:: Lexer_test.comment;
        ]
 
 let () = run_test_tt_main suite
