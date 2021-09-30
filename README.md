@@ -1,8 +1,8 @@
 # TCaml
-wip...
+Toy OCaml compiler \[WIP]
 
 ## Reference
 
-- [Functional Programming](http://logic.cs.tsukuba.ac.jp/jikken/index.html)
+- [[S-8] 関数プログラミング](http://logic.cs.tsukuba.ac.jp/jikken/index.html)
 - [mlml](https://github.com/coord-e/mlml)
 - [aqaml](https://github.com/ushitora-anqou/aqaml)
