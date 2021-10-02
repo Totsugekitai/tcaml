@@ -1,3 +1,3 @@
 (test
- (name tcaml_test)
- (libraries ounit2 tcaml_lib))
+ (name test_main)
+ (libraries ounit2))

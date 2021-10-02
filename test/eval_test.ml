@@ -1,8 +1,5 @@
 open OUnit2
-open Tcaml_lib
-open Value
-open Expr
-open Env
+open Tcaml
 
 let literal _ =
   (* 整数リテラル *)
