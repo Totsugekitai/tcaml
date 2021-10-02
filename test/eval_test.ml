@@ -1,5 +1,7 @@
 open OUnit2
-open Tcaml
+open Lib
+open Syntax
+open Eval
 
 let literal _ =
   (* 整数リテラル *)
@@ -12,17 +14,17 @@ let literal _ =
 
 let arithmetic _ =
   (* 加算 *)
-  assert_equal (IntVal 6) (eval (Add (IntLit 2, IntLit 4)) emptyenv);
-  assert_equal (IntVal 0) (eval (Add (IntLit 2, IntLit (-2))) emptyenv);
-  assert_equal (IntVal (-2)) (eval (Add (IntLit 2, IntLit (-4))) emptyenv);
+  assert_equal (IntVal 6) (eval (Plus (IntLit 2, IntLit 4)) emptyenv);
+  assert_equal (IntVal 0) (eval (Plus (IntLit 2, IntLit (-2))) emptyenv);
+  assert_equal (IntVal (-2)) (eval (Plus (IntLit 2, IntLit (-4))) emptyenv);
   (* 減算 *)
-  assert_equal (IntVal 6) (eval (Sub (IntLit 10, IntLit 4)) emptyenv);
-  assert_equal (IntVal 0) (eval (Sub (IntLit 10, IntLit 10)) emptyenv);
-  assert_equal (IntVal 14) (eval (Sub (IntLit 10, IntLit (-4))) emptyenv);
+  assert_equal (IntVal 6) (eval (Minus (IntLit 10, IntLit 4)) emptyenv);
+  assert_equal (IntVal 0) (eval (Minus (IntLit 10, IntLit 10)) emptyenv);
+  assert_equal (IntVal 14) (eval (Minus (IntLit 10, IntLit (-4))) emptyenv);
   (* 乗算 *)
-  assert_equal (IntVal 12) (eval (Mul (IntLit 3, IntLit 4)) emptyenv);
-  assert_equal (IntVal (-12)) (eval (Mul (IntLit (-3), IntLit 4)) emptyenv);
-  assert_equal (IntVal 0) (eval (Mul (IntLit 3, IntLit 0)) emptyenv);
+  assert_equal (IntVal 12) (eval (Times (IntLit 3, IntLit 4)) emptyenv);
+  assert_equal (IntVal (-12)) (eval (Times (IntLit (-3), IntLit 4)) emptyenv);
+  assert_equal (IntVal 0) (eval (Times (IntLit 3, IntLit 0)) emptyenv);
   (* 除算 *)
   assert_equal (IntVal 4) (eval (Div (IntLit 12, IntLit 3)) emptyenv);
   assert_equal (IntVal 0) (eval (Div (IntLit 3, IntLit 12)) emptyenv);
@@ -30,11 +32,11 @@ let arithmetic _ =
       eval (Div (IntLit 3, IntLit 0)) emptyenv);
   (* binopの例外検出 *)
   assert_raises (Failure "integer value expected") (fun () ->
-      eval (Add (IntLit 4, BoolLit true)) emptyenv);
+      eval (Plus (IntLit 4, BoolLit true)) emptyenv);
   assert_raises (Failure "integer value expected") (fun () ->
-      eval (Sub (IntLit 4, BoolLit true)) emptyenv);
+      eval (Minus (IntLit 4, BoolLit true)) emptyenv);
   assert_raises (Failure "integer value expected") (fun () ->
-      eval (Mul (IntLit 4, BoolLit true)) emptyenv);
+      eval (Times (IntLit 4, BoolLit true)) emptyenv);
   assert_raises (Failure "integer value expected") (fun () ->
       eval (Div (IntLit 4, BoolLit true)) emptyenv)
 
@@ -70,7 +72,7 @@ let env _ =
   assert_equal (IntVal 3) (eval (Var "x") env1);
   assert_equal (IntVal 5)
     (eval
-       (Let ("x", IntLit 3, Let ("y", IntLit 2, Add (Var "x", Var "y"))))
+       (Let ("x", IntLit 3, Let ("y", IntLit 2, Plus (Var "x", Var "y"))))
        env1);
   assert_equal (IntVal 2)
     (eval (Let ("x", IntLit 3, Let ("x", IntLit 2, Var "x"))) env1);
@@ -79,14 +81,14 @@ let env _ =
        (Let
           ( "x",
             IntLit 1,
-            Let ("y", Add (Var "x", IntLit 1), Add (Var "x", Var "y")) ))
+            Let ("y", Plus (Var "x", IntLit 1), Plus (Var "x", Var "y")) ))
        emptyenv);
   assert_equal (IntVal 5)
     (eval
        (Let
           ( "x",
             IntLit 1,
-            Add
-              ( Let ("x", IntLit 2, Add (Var "x", IntLit 1)),
-                Mul (Var "x", IntLit 2) ) ))
+            Plus
+              ( Let ("x", IntLit 2, Plus (Var "x", IntLit 1)),
+                Times (Var "x", IntLit 2) ) ))
        emptyenv)

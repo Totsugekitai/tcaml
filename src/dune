@@ -1,6 +1,5 @@
-(executable
- (public_name tcaml)
- (name main))
+(library
+ (name lib))
 
 (ocamllex lexer)
 

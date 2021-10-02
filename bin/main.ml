@@ -1,10 +1,9 @@
 (* main.ml *)
+open Lib
 
 (* 与えられた文字列の字句解析と構文解析だけを行う関数 *)
-(* parse : string -> exp *)
+(* parse : string -> Syntax.exp *)
 let parse str = Parser.main Lexer.token (Lexing.from_string str)
-
-let main = Eval.eval (parse "1+2 *3")
 
 (* 使用例は以下の通り。parse関数は Mainモジュールにはいっているので
       open Main;; parse "...";; とするか Main.parse "...";;
