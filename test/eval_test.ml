@@ -3,92 +3,75 @@ open Lib
 open Syntax
 open Eval
 
+let parse str = Parser.main Lexer.token (Lexing.from_string str)
+
 let literal _ =
   (* 整数リテラル *)
-  assert_equal (IntVal 1) (eval (IntLit 1) emptyenv);
-  assert_equal (IntVal 0) (eval (IntLit 0) emptyenv);
-  assert_equal (IntVal (-1)) (eval (IntLit (-1)) emptyenv);
+  assert_equal (IntVal 1) (eval (parse "1") emptyenv);
+  assert_equal (IntVal 0) (eval (parse "0") emptyenv);
+  assert_equal (IntVal (-1)) (eval (parse "-1") emptyenv);
   (* 真偽値リテラル *)
-  assert_equal (BoolVal true) (eval (BoolLit true) emptyenv);
-  assert_equal (BoolVal false) (eval (BoolLit false) emptyenv)
+  assert_equal (BoolVal true) (eval (parse "true") emptyenv);
+  assert_equal (BoolVal false) (eval (parse "false") emptyenv)
 
 let arithmetic _ =
   (* 加算 *)
-  assert_equal (IntVal 6) (eval (Plus (IntLit 2, IntLit 4)) emptyenv);
-  assert_equal (IntVal 0) (eval (Plus (IntLit 2, IntLit (-2))) emptyenv);
-  assert_equal (IntVal (-2)) (eval (Plus (IntLit 2, IntLit (-4))) emptyenv);
+  assert_equal (IntVal 6) (eval (parse "4 + 2") emptyenv);
+  assert_equal (IntVal 0) (eval (parse "2 + (-2)") emptyenv);
+  assert_equal (IntVal (-2)) (eval (parse "2+(-4)") emptyenv);
   (* 減算 *)
-  assert_equal (IntVal 6) (eval (Minus (IntLit 10, IntLit 4)) emptyenv);
-  assert_equal (IntVal 0) (eval (Minus (IntLit 10, IntLit 10)) emptyenv);
-  assert_equal (IntVal 14) (eval (Minus (IntLit 10, IntLit (-4))) emptyenv);
+  assert_equal (IntVal 6) (eval (parse "10 - 4") emptyenv);
+  assert_equal (IntVal 0) (eval (parse "10 - 10") emptyenv);
+  assert_equal (IntVal 14) (eval (parse "10 - (-4)") emptyenv);
   (* 乗算 *)
-  assert_equal (IntVal 12) (eval (Times (IntLit 3, IntLit 4)) emptyenv);
-  assert_equal (IntVal (-12)) (eval (Times (IntLit (-3), IntLit 4)) emptyenv);
-  assert_equal (IntVal 0) (eval (Times (IntLit 3, IntLit 0)) emptyenv);
+  assert_equal (IntVal 12) (eval (parse "3 * 4") emptyenv);
+  assert_equal (IntVal (-12)) (eval (parse "(-3) * 4") emptyenv);
+  assert_equal (IntVal 0) (eval (parse "3 * 0") emptyenv);
   (* 除算 *)
-  assert_equal (IntVal 4) (eval (Div (IntLit 12, IntLit 3)) emptyenv);
-  assert_equal (IntVal 0) (eval (Div (IntLit 3, IntLit 12)) emptyenv);
+  assert_equal (IntVal 4) (eval (parse "12 / 3") emptyenv);
+  assert_equal (IntVal 0) (eval (parse "3 / 12") emptyenv);
   assert_raises (Failure "zero division") (fun () ->
-      eval (Div (IntLit 3, IntLit 0)) emptyenv);
+      eval (parse "3 / 0") emptyenv);
   (* binopの例外検出 *)
   assert_raises (Failure "integer value expected") (fun () ->
-      eval (Plus (IntLit 4, BoolLit true)) emptyenv);
+      eval (parse "4 + true") emptyenv);
   assert_raises (Failure "integer value expected") (fun () ->
-      eval (Minus (IntLit 4, BoolLit true)) emptyenv);
+      eval (parse "4 - true") emptyenv);
   assert_raises (Failure "integer value expected") (fun () ->
-      eval (Times (IntLit 4, BoolLit true)) emptyenv);
+      eval (parse "4 * true") emptyenv);
   assert_raises (Failure "integer value expected") (fun () ->
-      eval (Div (IntLit 4, BoolLit true)) emptyenv)
+      eval (parse "4 / true") emptyenv)
 
 let comp _ =
   (* Eq *)
-  assert_equal (BoolVal true) (eval (Eq (IntLit 3, IntLit 3)) emptyenv);
-  assert_equal (BoolVal false) (eval (Eq (IntLit 3, IntLit 4)) emptyenv);
-  assert_equal (BoolVal true) (eval (Eq (BoolLit true, BoolLit true)) emptyenv);
-  assert_equal (BoolVal true)
-    (eval (Eq (BoolLit false, BoolLit false)) emptyenv);
+  assert_equal (BoolVal true) (eval (parse " 3 = 3") emptyenv);
+  assert_equal (BoolVal false) (eval (parse "3 = 4") emptyenv);
+  assert_equal (BoolVal true) (eval (parse " true = true") emptyenv);
+  assert_equal (BoolVal true) (eval (parse "false = false") emptyenv);
   (* Greater *)
-  assert_equal (BoolVal true) (eval (Greater (IntLit 5, IntLit 3)) emptyenv);
-  assert_equal (BoolVal false) (eval (Greater (IntLit 3, IntLit 5)) emptyenv);
-  assert_equal (BoolVal false) (eval (Greater (IntLit 3, IntLit 3)) emptyenv);
+  assert_equal (BoolVal true) (eval (parse "5 > 3") emptyenv);
+  assert_equal (BoolVal false) (eval (parse "3 > 5") emptyenv);
+  assert_equal (BoolVal false) (eval (parse "3 > 3") emptyenv);
   (* Less *)
-  assert_equal (BoolVal true) (eval (Less (IntLit 3, IntLit 5)) emptyenv);
-  assert_equal (BoolVal false) (eval (Less (IntLit 5, IntLit 3)) emptyenv);
-  assert_equal (BoolVal false) (eval (Less (IntLit 5, IntLit 5)) emptyenv)
+  assert_equal (BoolVal true) (eval (parse "3 < 5") emptyenv);
+  assert_equal (BoolVal false) (eval (parse "5 < 3") emptyenv);
+  assert_equal (BoolVal false) (eval (parse "5 < 5") emptyenv)
 
 let control_expr _ =
   (* If *)
-  assert_equal (IntVal 3)
-    (eval (If (BoolLit true, IntLit 3, IntLit 2)) emptyenv);
-  assert_equal (IntVal 2)
-    (eval (If (BoolLit false, IntLit 3, IntLit 2)) emptyenv)
+  assert_equal (IntVal 3) (eval (parse "if true then 3 else 2") emptyenv);
+  assert_equal (IntVal 2) (eval (parse "if false then 3 else 2") emptyenv)
 
 let env _ =
   assert_raises (Failure "unbound variable: x") (fun () ->
-      eval (Var "x") emptyenv);
+      eval (parse "x") emptyenv);
   assert_raises (Failure "unbound variable: foo") (fun () ->
-      eval (Var "foo") emptyenv);
+      eval (parse "foo") emptyenv);
   let env1 = ext emptyenv "x" (IntVal 3) in
-  assert_equal (IntVal 3) (eval (Var "x") env1);
-  assert_equal (IntVal 5)
-    (eval
-       (Let ("x", IntLit 3, Let ("y", IntLit 2, Plus (Var "x", Var "y"))))
-       env1);
-  assert_equal (IntVal 2)
-    (eval (Let ("x", IntLit 3, Let ("x", IntLit 2, Var "x"))) env1);
+  assert_equal (IntVal 3) (eval (parse "x") env1);
+  assert_equal (IntVal 5) (eval (parse "let x = 3 in let y = 2 in x + y") env1);
+  assert_equal (IntVal 2) (eval (parse "let x = 3 in let x = 2 in x") env1);
   assert_equal (IntVal 3)
-    (eval
-       (Let
-          ( "x",
-            IntLit 1,
-            Let ("y", Plus (Var "x", IntLit 1), Plus (Var "x", Var "y")) ))
-       emptyenv);
+    (eval (parse "let x = 1 in let y = x + 1 in x + y") emptyenv);
   assert_equal (IntVal 5)
-    (eval
-       (Let
-          ( "x",
-            IntLit 1,
-            Plus
-              ( Let ("x", IntLit 2, Plus (Var "x", IntLit 1)),
-                Times (Var "x", IntLit 2) ) ))
-       emptyenv)
+    (eval (parse "let x = 1 in (let x = 2 in x + 1) + x * 2") emptyenv)
