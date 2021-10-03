@@ -35,8 +35,5 @@ type value =
   (* recursive function value: solution-1 *)
   (* let rec f x = e1 in e2 *)
   | RecFunVal of string * string * exp * env
-  (* recursive function value: solution-2 *)
-  (* let rec f x = e1 in e2 *)
-  | RecFunVal2 of string * string * exp * env ref
 
 and env = (string * value) list

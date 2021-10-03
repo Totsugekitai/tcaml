@@ -8,6 +8,7 @@ let suite =
          "Eval_test.comp" >:: Eval_test.comp;
          "Eval_test.control_expr" >:: Eval_test.control_expr;
          "Eval_test.env" >:: Eval_test.env;
+         "Eval_test.list" >:: Eval_test.list;
        ]
 
 let () = run_test_tt_main suite

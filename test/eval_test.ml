@@ -48,6 +48,13 @@ let comp _ =
   assert_equal (BoolVal false) (eval (parse "3 = 4") emptyenv);
   assert_equal (BoolVal true) (eval (parse " true = true") emptyenv);
   assert_equal (BoolVal true) (eval (parse "false = false") emptyenv);
+  assert_equal (BoolVal true) (eval (parse "[] = []") emptyenv);
+  assert_equal (BoolVal true) (eval (parse "[1;2] = [1;2]") emptyenv);
+  assert_equal (BoolVal false) (eval (parse "[1;2] = [1;3]") emptyenv);
+  assert_equal (BoolVal true)
+    (eval (parse "[1;2;[3;4;5]] = [1;2;[3;4;5]]") emptyenv);
+  assert_equal (BoolVal false)
+    (eval (parse "[1;2;[3;4;5]] = [1;2;[3;4;6]]") emptyenv);
   (* InEq *)
   assert_equal (BoolVal false) (eval (parse "3 <> 3") emptyenv);
   assert_equal (BoolVal true) (eval (parse "3 <> 4") emptyenv);
@@ -80,3 +87,13 @@ let env _ =
     (eval (parse "let x = 1 in let y = x + 1 in x + y") emptyenv);
   assert_equal (IntVal 5)
     (eval (parse "let x = 1 in (let x = 2 in x + 1) + x * 2") emptyenv)
+
+let list _ =
+  assert_equal (ListVal []) (eval (parse "[]") emptyenv);
+  assert_equal (ListVal [ IntVal 3; IntVal 4 ]) (eval (parse "[3;4]") emptyenv);
+  assert_equal
+    (ListVal [ BoolVal true; BoolVal false ])
+    (eval (parse "[true; false]") emptyenv);
+  assert_equal
+    (ListVal [ ListVal []; ListVal [ IntVal 3; IntVal 4 ] ])
+    (eval (parse "[[];[3;4]]") emptyenv)
