@@ -48,6 +48,11 @@ let comp _ =
   assert_equal (BoolVal false) (eval (parse "3 = 4") emptyenv);
   assert_equal (BoolVal true) (eval (parse " true = true") emptyenv);
   assert_equal (BoolVal true) (eval (parse "false = false") emptyenv);
+  (* InEq *)
+  assert_equal (BoolVal false) (eval (parse "3 <> 3") emptyenv);
+  assert_equal (BoolVal true) (eval (parse "3 <> 4") emptyenv);
+  assert_equal (BoolVal false) (eval (parse "true <> true") emptyenv);
+  assert_equal (BoolVal false) (eval (parse "false <> false") emptyenv);
   (* Greater *)
   assert_equal (BoolVal true) (eval (parse "5 > 3") emptyenv);
   assert_equal (BoolVal false) (eval (parse "3 > 5") emptyenv);

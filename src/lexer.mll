@@ -21,6 +21,7 @@ rule token = parse
   | '*'       { ASTERISK }
   | '/'       { SLASH }
   | '='       { EQUAL }
+  | "<>"      { INEQUAL }
   | '<'       { LESS }
   | '>'       { GREATER }
   | ';'       { SEMICOL }
