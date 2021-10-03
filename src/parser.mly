@@ -50,7 +50,7 @@ open Syntax
 %nonassoc IN ELSE ARROW WITH
 %left VBAR
 %left SEMICOL
-%left EQUAL GREATER LESS
+%left EQUAL INEQUAL GREATER LESS
 %right COLCOL
 %left PLUS MINUS
 %left ASTERISK SLASH
