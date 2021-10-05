@@ -22,8 +22,8 @@ type exp =
   | Match of exp * (exp * exp) list (* match e with e->e | ... *)
   | Cons of exp * exp (* e :: e *)
   | Head of exp (* List.hd e *)
-  | Tail of exp
-(* List.tl e *)
+  | Tail of exp (* List.tl e *)
+  | Callcc of exp
 
 (* 値の型 *)
 type value =
@@ -35,5 +35,6 @@ type value =
   (* recursive function value: solution-1 *)
   (* let rec f x = e1 in e2 *)
   | RecFunVal of string * string * exp * env
+  | ContVal of (value -> value)
 
 and env = (string * value) list

@@ -76,19 +76,21 @@ let rec eval e env cont =
   (* リストに対する操作 *)
   | Empty -> ListVal []
   | Cons (e1, e2) -> (
-      match (eval e1 env, eval e2 env) with
+      match (eval e1 env cont, eval e2 env cont) with
       | v1, ListVal v2 -> ListVal (v1 :: v2)
       | _ -> failwith "unexpected list")
   | Head e -> (
-      match eval e env with
+      match eval e env cont with
       | ListVal [] -> ListVal []
       | ListVal (hd :: _) -> hd
       | _ -> failwith "expected list, but other found")
   | Tail e -> (
-      match eval e env with
+      match eval e env cont with
       | ListVal [] -> ListVal []
       | ListVal (_ :: tl) -> ListVal tl
       | _ -> failwith "expected list, but other found")
+  (* 継続 *)
+  | Callcc e1 -> eval e1 env (fun funpart -> app funpart (ContVal cont) cont)
   | _ -> failwith "unexpected expr"
 
 and eq_val v1 v2 =
@@ -115,4 +117,5 @@ and app funpart arg cont =
   | RecFunVal (f, x, body, env1) ->
       let env2 = ext (ext env1 x arg) f funpart in
       eval body env2 cont
+  | ContVal cont1 -> cont1 arg (* switch continuation *)
   | _ -> failwith "unexpected expr"
