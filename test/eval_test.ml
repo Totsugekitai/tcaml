@@ -2,6 +2,7 @@ open OUnit2
 open Lib
 open Syntax
 open Eval
+open Env
 
 let parse str = Parser.main Lexer.token (Lexing.from_string str)
 
